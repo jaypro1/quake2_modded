@@ -1009,6 +1009,12 @@ typedef enum
 #define STAT_CHASE				16
 #define STAT_SPECTATOR			17
 
+#define STAT_TIME_HOURS			18
+#define STAT_TIME_MINUTES		19
+#define STAT_TIME_SECONDS		20
+
+
+
 #define	MAX_STATS				32
 
 

@@ -701,6 +701,27 @@ char *single_statusbar =
 "	xv	148 "
 "	pic	11 "
 "endif "
+
+//NEW The Time to Live. // HOUR
+"if 18 "
+"	yt	96 "		
+"	xr	-150 "		
+"	num	2	18 "
+"endif "
+
+//NEW The Time to Live. // HOUR
+"if 19 "
+"	yt	96 "
+"	xr	-100 "
+"	num	2	19 "
+"endif "
+
+//NEW The Time to Live. // HOUR
+"if 20 "
+"	yt	96 "
+"	xr	-50 "
+"	num	2	20 "
+"endif "
 ;
 
 char *dm_statusbar =
@@ -780,6 +801,10 @@ char *dm_statusbar =
   "xv 64 "
   "stat_string 16 "
 "endif "
+
+
+
+
 ;
 
 

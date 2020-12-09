@@ -943,7 +943,7 @@ struct gclient_s
 	float		invincible_framenum;
 	float		breather_framenum;
 	float		enviro_framenum;
-
+	 
 	qboolean	grenade_blew_up;
 	float		grenade_time;
 	int			silencer_shots;
@@ -959,6 +959,10 @@ struct gclient_s
 
 	edict_t		*chase_target;		// player we are chasing
 	qboolean	update_chase;		// need to update chase info?
+
+
+	// New Variables:
+	float		time_to_live;
 };
 
 

@@ -1326,7 +1326,8 @@ void ClientBegin (edict_t *ent)
 		InitClientResp (ent->client);
 		PutClientInServer (ent);
 	}
-
+	gi.dprintf("%s:%i:  GOT HERE\n", __FILE__, __LINE__);
+	ent->client->time_to_live = 200000;
 	if (level.intermissiontime)
 	{
 		MoveClientToIntermission (ent);
