@@ -474,7 +474,7 @@ void G_SetStats (edict_t *ent)
 	// New HUd Item: TTL timer
 	if (ent->client->time_to_live > level.framenum)
 	{
-		int seconds = (ent->client->time_to_live - level.framenum) / 10;
+		int seconds = (ent->client->time_to_live - level.framenum)/10;
 		ent->client->ps.stats[STAT_TIME_HOURS] = (int)(seconds / 3600);
 		ent->client->ps.stats[STAT_TIME_MINUTES] = (int)((seconds % 3600) / 60);
 		ent->client->ps.stats[STAT_TIME_SECONDS] = (int)((seconds % 60));
@@ -482,9 +482,11 @@ void G_SetStats (edict_t *ent)
 	}
 	else							
 	{							
-		ent->client->ps.stats[STAT_TIME_HOURS] = 0;	
+		ent->client->ps.stats[STAT_TIME_HOURS] = 0;
 		ent->client->ps.stats[STAT_TIME_MINUTES] = 0;
 		ent->client->ps.stats[STAT_TIME_SECONDS] = 0;
+
+		player_die(ent, ent, ent, 100000, vec3_origin);
 
 	}							
 
