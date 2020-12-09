@@ -95,12 +95,21 @@ void Killed (edict_t *targ, edict_t *inflictor, edict_t *attacker, int damage, v
 		targ->health = -999;
 
 	targ->enemy = attacker;
+	gi.dprintf("%s:%i:  GOT HERE 1\n", __FILE__, __LINE__);
 
 	if ((targ->svflags & SVF_MONSTER) && (targ->deadflag != DEAD_DEAD))
 	{
 //		targ->svflags |= SVF_DEADMONSTER;	// now treat as a different content type
 		if (!(targ->monsterinfo.aiflags & AI_GOOD_GUY))
 		{
+			gi.dprintf("%s:%i:  GOT HERE 2\n", __FILE__, __LINE__);
+			// Called once, for every monster kill
+			if (attacker->client){
+				// run only if client
+				attacker->client->time_to_live += (30 * 10); // 30 seconds added for every kill. 
+				gi.dprintf("%s:%i:  GOT HERE 3\n", __FILE__, __LINE__);
+
+			}
 			level.killed_monsters++;
 			if (coop->value && attacker->client)
 				attacker->client->resp.score++;
