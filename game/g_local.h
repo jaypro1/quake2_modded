@@ -977,6 +977,9 @@ struct gclient_s
 
 	int			damage_upgrade_count;
 	int			damage_framenum;
+	
+	int			killCount;
+	float		lastKill_framenum;
 };
 
 

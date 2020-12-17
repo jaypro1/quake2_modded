@@ -1013,6 +1013,8 @@ typedef enum
 #define STAT_TIME_MINUTES		19
 #define STAT_TIME_SECONDS		20
 
+#define COMBO_TIME				21
+#define COMBO_TEXT				22
 
 
 #define	MAX_STATS				32

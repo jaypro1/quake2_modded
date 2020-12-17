@@ -1344,6 +1344,12 @@ void ClientBegin (edict_t *ent)
 	ent->client->damage_upgrade_count = 0;
 	ent->client->damage_framenum = 0;
 
+
+	// Combo Effect initialization
+	ent->client->killCount = 0;
+	ent->client->lastKill_framenum = -100;
+
+
 	if (level.intermissiontime)
 	{
 		MoveClientToIntermission (ent);

@@ -106,29 +106,56 @@ void Killed (edict_t *targ, edict_t *inflictor, edict_t *attacker, int damage, v
 				// run only if client
 				attacker->client->time_to_live += (30 * 10); // 30 seconds added for every kill. 
 
-				gi.dprintf("%s:%i: Origin: %d, %d, %d\n", __FILE__, __LINE__, 
+
+				if (attacker->client->lastKill_framenum + 100 > level.framenum){
+					// This kill happened within 10 seconds of previous kill
+					attacker->client->killCount++;
+					attacker->client->lastKill_framenum = level.framenum;
+				}
+				else{
+					attacker->client->killCount = 1;
+					attacker->client->lastKill_framenum = level.framenum;
+				}
+				gitem_t* it = NULL;
+				switch (attacker->client->killCount)
+				{
+					case(5) :
+						it = FindItem("Player Speed upgrade");
+						break;
+					case(4) :
+						it = FindItem("Player Speed upgrade");
+						break;
+					case(3) :
+						it = FindItem("Player Speed upgrade");
+						break;
+					case(2) :
+						it = FindItem("Player Speed upgrade");
+						break;
+					case(1) :
+						break;
+					default:
+						break;
+				}
+				gi.dprintf("%s:%i: Move Origin: %d, %d, %d\n", __FILE__, __LINE__, 
 					attacker->client->ps.pmove.origin[0],
 					attacker->client->ps.pmove.origin[1],
 					attacker->client->ps.pmove.origin[2]);
 				
-				gi.dprintf("%s:%i: Origin: %f, %f, %f\n", __FILE__, __LINE__,
+				gi.dprintf("%s:%i: S Origin: %f, %f, %f\n", __FILE__, __LINE__,
 					attacker->s.origin[0],
 					attacker->s.origin[1],
 					attacker->s.origin[2]);
 
-				gitem_t* it = FindItem("Player Speed upgrade");
+				//gitem_t* it = FindItem("Player Speed upgrade");
 				gi.dprintf("%s:%i:  GOT HERE 2\n", __FILE__, __LINE__);
-
-				edict_t* it_ent = G_Spawn();
-				VectorCopy(targ->s.origin, it_ent->s.origin);
-
-				it_ent->classname = it->classname;
 				
-				gi.dprintf("%s:%i:  GOT HERE %d, %d, %d \n", __FILE__, __LINE__, targ->s.origin[0], targ->s.origin[1], targ->s.origin[2]);
+				if (it){
+					edict_t* it_ent = G_Spawn();
+					VectorCopy(targ->s.origin, it_ent->s.origin);
+					it_ent->classname = it->classname;
+					SpawnItem(it_ent, it);
+				}
 				
-				SpawnItem(it_ent, it);
-				gi.dprintf("%s:%i:  GOT HERE 3\n", __FILE__, __LINE__);
-
 			}
 			level.killed_monsters++;
 			if (coop->value && attacker->client)

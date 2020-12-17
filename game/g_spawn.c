@@ -726,6 +726,24 @@ char *single_statusbar =
 "	xr	-50 "
 "	num	2	20 "
 "endif "
+
+"if 21 "
+"	yt	50 "
+"	xr	-800 "
+"	num	2	21 "
+"	yt	50 "
+"	xr	-750 "
+"	string \"Sec\""
+"endif "
+
+"if 22 "
+"	yt	50 "
+"	xr	-1000 "
+"	num 2	22 "
+"	yt	50 "
+"	xr	-950 "
+"	string \"Kill Combo\""
+"endif "
 ;
 
 char *dm_statusbar =
