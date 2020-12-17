@@ -1328,6 +1328,22 @@ void ClientBegin (edict_t *ent)
 	}
 	gi.dprintf("%s:%i:  GOT HERE\n", __FILE__, __LINE__);
 	ent->client->time_to_live = 10000 * 10; // Multiply initial time by 10, because 10 frames per second. 
+
+	ent->client->player_speed_upgrade_count = 0;
+	ent->client->player_speed_framenum = 0;
+
+	ent->client->weapon_speed_upgrade_count = 0;
+	ent->client->weapon_speed_framenum = 0;
+
+	ent->client->regen_upgrade_count = 0;
+	ent->client->regen_framenum = 0;
+
+	ent->client->invulnerability_upgrade_count = 0;
+	ent->client->invulnerability_framenum = 0;
+
+	ent->client->damage_upgrade_count = 0;
+	ent->client->damage_framenum = 0;
+
 	if (level.intermissiontime)
 	{
 		MoveClientToIntermission (ent);

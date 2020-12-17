@@ -290,10 +290,13 @@ void ED_CallSpawn (edict_t *ent)
 	// check item spawn functions
 	for (i=0,item=itemlist ; i<game.num_items ; i++,item++)
 	{
+		
 		if (!item->classname)
 			continue;
 		if (!strcmp(item->classname, ent->classname))
 		{	// found it
+			gi.dprintf("%s:%i:  Class: %s , Origin: %s \n", __FILE__, __LINE__,
+				item->classname, vtos(ent->s.origin));
 			SpawnItem (ent, item);
 			return;
 		}
@@ -549,6 +552,7 @@ void SpawnEntities (char *mapname, char *entities, char *spawnpoint)
 
 	ent = NULL;
 	inhibit = 0;
+	gi.dprintf("%s:%i:  GOT Map: %s\n", __FILE__, __LINE__,mapname);
 
 // parse ents
 	while (1)

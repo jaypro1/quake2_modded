@@ -752,6 +752,37 @@ void Drop_PowerArmor (edict_t *ent, gitem_t *item)
 }
 
 //======================================================================
+	// Player Speed
+qboolean Pickup_Player_Speed(edict_t *ent, edict_t *other)
+{
+	other->client->pers.inventory[ITEM_INDEX(ent->item)]++;
+	ent->item->use(other, ent->item);
+	return true;
+}
+void Use_Player_Speed(edict_t *ent, gitem_t *item)
+{
+	ent->client->pers.inventory[ITEM_INDEX(item)]--;
+	ValidateSelectedItem(ent);
+	if (ent->client->player_speed_framenum > level.framenum)
+		ent->client->player_speed_framenum += 300;
+	else
+		ent->client->player_speed_framenum = level.framenum + 300;
+
+}
+
+//======================================================================
+	// Weapon Speed
+
+//======================================================================
+	// invulnerability
+
+//======================================================================
+	// Player Regen
+
+//======================================================================
+	// Player Damage Amp. 
+
+//======================================================================
 
 /*
 ===============
@@ -2109,6 +2140,26 @@ tank commander's head
 		NULL,
 		0,
 /* precache */ "items/s_health.wav items/n_health.wav items/l_health.wav items/m_health.wav"
+	},
+
+	{
+		"item_player_speed",
+		Pickup_Player_Speed,
+		Use_Player_Speed,
+		Drop_General,
+		NULL,
+		"items/pkup.wav",
+		"models/player_speed/tris.md2", EF_ROTATE,
+		NULL,
+		/* icon */ "tech1",
+		/* pickup */ "Player Speed upgrade",
+		/* width */ 2,
+		0,
+		NULL,
+		0,
+		NULL,
+		0,
+		/* precache */ ""
 	},
 
 	// end of list marker

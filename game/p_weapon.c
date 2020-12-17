@@ -408,6 +408,10 @@ void Weapon_Generic (edict_t *ent, int FRAME_ACTIVATE_LAST, int FRAME_FIRE_LAST,
 				
 			}
 		}
+		gi.dprintf("%s:%i:Weapon Origin: %d, %d, %d\n", __FILE__, __LINE__,
+			ent->client->ps.pmove.origin[0],
+			ent->client->ps.pmove.origin[1],
+			ent->client->ps.pmove.origin[2]);
 
 		ent->client->ps.gunframe++;
 		return;
@@ -852,6 +856,11 @@ void Weapon_Blaster_Fire (edict_t *ent)
 		damage = 15;
 	else
 		damage = 10;
+	gi.dprintf("%s:%i:Weapon Origin: %d, %d, %d\n", __FILE__, __LINE__,
+		ent->client->ps.pmove.origin[0],
+		ent->client->ps.pmove.origin[1],
+		ent->client->ps.pmove.origin[2]);
+
 	Blaster_Fire (ent, vec3_origin, damage, false, EF_BLASTER);
 	ent->client->ps.gunframe++;
 }
@@ -860,7 +869,7 @@ void Weapon_Blaster (edict_t *ent)
 {
 	static int	pause_frames[]	= {19, 32, 0};
 	static int	fire_frames[]	= {5, 0};
-
+	
 	Weapon_Generic (ent, 4, 8, 52, 55, pause_frames, fire_frames, Weapon_Blaster_Fire);
 }
 
