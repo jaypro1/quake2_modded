@@ -1600,6 +1600,52 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 	level.current_entity = ent;
 	client = ent->client;
 
+
+	float ClassSpeedModifer, t;
+	vec3_t velo;
+	vec3_t  end, forward, right, up, add;
+	ClassSpeedModifer = 5 * 0.2;
+	//Figure out speed
+	VectorClear(velo);
+	
+	/*
+	AngleVectors(ent->client->v_angle, forward, right, up);
+	VectorScale(forward, ucmd->forwardmove*ClassSpeedModifer, end);
+	VectorAdd(end, velo, velo);
+
+	AngleVectors(ent->client->v_angle, forward, right, up);
+	VectorScale(right, ucmd->sidemove*ClassSpeedModifer, end);
+	VectorAdd(end, velo, velo);
+	*/
+	AngleVectors(ent->client->v_angle, forward, right, up);
+	VectorScale(up, ucmd->upmove*ClassSpeedModifer, end);
+	VectorAdd(end, velo, velo);
+
+	if (ent->groundentity)//add 
+		VectorAdd(velo, ent->velocity, ent->velocity);
+	else if (ent->waterlevel)
+		VectorAdd(velo, ent->velocity, ent->velocity);
+	else
+	{
+		//Allow for a little movement but not as much
+		velo[0] *= 0.25;
+		velo[1] *= 0.25;
+		velo[2] *= 0.25;
+		VectorAdd(velo, ent->velocity, ent->velocity);
+	}
+	//Make sure not going to fast. THis slows down grapple too
+	t = VectorLength(ent->velocity);
+	if (t > 300 * ClassSpeedModifer || t < -300 * ClassSpeedModifer)
+	{
+		VectorScale(ent->velocity, 300 * ClassSpeedModifer / t, ent->velocity);
+	}
+
+	//Set these to 0 so pmove thinks we aren't pressing forward or sideways since we are handling all the player forward and sideways speeds
+	//ucmd->forwardmove = 0;
+	//ucmd->sidemove = 0;
+	ucmd->upmove = 0;
+
+
 	if (level.intermissiontime)
 	{
 		client->ps.pmove.pm_type = PM_FREEZE;

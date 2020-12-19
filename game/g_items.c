@@ -108,7 +108,12 @@ gitem_t	*FindItem (char *pickup_name)
 		if (!it->pickup_name)
 			continue;
 		if (!Q_stricmp(it->pickup_name, pickup_name))
+		{
+			gi.dprintf("%s:%i: Got Item:  %s, at int: %d\n", __FILE__, __LINE__,pickup_name, i);
+
 			return it;
+		}
+			
 	}
 
 	return NULL;
@@ -756,11 +761,14 @@ void Drop_PowerArmor (edict_t *ent, gitem_t *item)
 qboolean Pickup_Player_Speed(edict_t *ent, edict_t *other)
 {
 	other->client->pers.inventory[ITEM_INDEX(ent->item)]++;
+	// Instantly use item. 
 	ent->item->use(other, ent->item);
 	return true;
 }
 void Use_Player_Speed(edict_t *ent, gitem_t *item)
 {
+	gi.dprintf("%s:%i:  Using Player Speed\n", __FILE__, __LINE__);
+
 	ent->client->pers.inventory[ITEM_INDEX(item)]--;
 	ValidateSelectedItem(ent);
 	if (ent->client->player_speed_framenum > level.framenum)
