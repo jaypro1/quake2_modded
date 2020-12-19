@@ -757,15 +757,15 @@ void Drop_PowerArmor (edict_t *ent, gitem_t *item)
 }
 
 //======================================================================
-	// Player Speed
-qboolean Pickup_Player_Speed(edict_t *ent, edict_t *other)
+	// Player Flight. 
+qboolean Pickup_Player_Flight(edict_t *ent, edict_t *other)
 {
 	other->client->pers.inventory[ITEM_INDEX(ent->item)]++;
 	// Instantly use item. 
 	ent->item->use(other, ent->item);
 	return true;
 }
-void Use_Player_Speed(edict_t *ent, gitem_t *item)
+void Use_Player_Flight(edict_t *ent, gitem_t *item)
 {
 	gi.dprintf("%s:%i:  Using Player Speed\n", __FILE__, __LINE__);
 
@@ -2152,18 +2152,19 @@ tank commander's head
 
 	{
 		"item_player_speed",
-		Pickup_Player_Speed,
-		Use_Player_Speed,
+		Pickup_Player_Flight,
+		Use_Player_Flight,
 		Drop_General,
 		NULL,
 		"items/pkup.wav",
 		"models/player_speed/tris.md2", EF_ROTATE,
 		NULL,
 		/* icon */ "tech1",
-		/* pickup */ "Player Speed upgrade",
+		/* pickup */ "Player Flight upgrade",
 		/* width */ 2,
 		0,
 		NULL,
+		IT_STAY_COOP | IT_POWERUP,
 		0,
 		NULL,
 		0,

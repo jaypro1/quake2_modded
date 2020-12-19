@@ -1603,20 +1603,11 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 
 	float ClassSpeedModifer, t;
 	vec3_t velo;
-	vec3_t  end, forward, right, up, add;
+	vec3_t  end, forward, right, up;
 	ClassSpeedModifer = 5 * 0.2;
 	//Figure out speed
 	VectorClear(velo);
 	
-	/*
-	AngleVectors(ent->client->v_angle, forward, right, up);
-	VectorScale(forward, ucmd->forwardmove*ClassSpeedModifer, end);
-	VectorAdd(end, velo, velo);
-
-	AngleVectors(ent->client->v_angle, forward, right, up);
-	VectorScale(right, ucmd->sidemove*ClassSpeedModifer, end);
-	VectorAdd(end, velo, velo);
-	*/
 	AngleVectors(ent->client->v_angle, forward, right, up);
 	VectorScale(up, ucmd->upmove*ClassSpeedModifer, end);
 	VectorAdd(end, velo, velo);

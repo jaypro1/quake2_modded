@@ -120,16 +120,16 @@ void Killed (edict_t *targ, edict_t *inflictor, edict_t *attacker, int damage, v
 				switch (attacker->client->killCount)
 				{
 					case(5) :
-						it = FindItem("Player Speed upgrade");
+						it = FindItem("Player Flight upgrade");
 						break;
 					case(4) :
-						it = FindItem("Player Speed upgrade");
+						it = FindItem("Player Flight upgrade");
 						break;
 					case(3) :
-						it = FindItem("Player Speed upgrade");
+						it = FindItem("Player Flight upgrade");
 						break;
 					case(2) :
-						it = FindItem("Player Speed upgrade");
+						it = FindItem("Player Flight upgrade");
 						break;
 					case(1) :
 						break;
@@ -146,7 +146,7 @@ void Killed (edict_t *targ, edict_t *inflictor, edict_t *attacker, int damage, v
 					attacker->s.origin[1],
 					attacker->s.origin[2]);
 
-				//gitem_t* it = FindItem("Player Speed upgrade");
+				//gitem_t* it = FindItem("Player Flight upgrade");
 				gi.dprintf("%s:%i:  GOT HERE 2\n", __FILE__, __LINE__);
 				
 				if (it){
