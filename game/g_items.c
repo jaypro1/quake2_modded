@@ -241,6 +241,8 @@ qboolean Pickup_Bandolier (edict_t *ent, edict_t *other)
 	if (item)
 	{
 		index = ITEM_INDEX(item);
+		other->client->time_to_live += item->quantity * 10;
+
 		other->client->pers.inventory[index] += item->quantity;
 		if (other->client->pers.inventory[index] > other->client->pers.max_bullets)
 			other->client->pers.inventory[index] = other->client->pers.max_bullets;
@@ -250,6 +252,8 @@ qboolean Pickup_Bandolier (edict_t *ent, edict_t *other)
 	if (item)
 	{
 		index = ITEM_INDEX(item);
+		other->client->time_to_live += item->quantity * 10;
+
 		other->client->pers.inventory[index] += item->quantity;
 		if (other->client->pers.inventory[index] > other->client->pers.max_shells)
 			other->client->pers.inventory[index] = other->client->pers.max_shells;
@@ -283,6 +287,8 @@ qboolean Pickup_Pack (edict_t *ent, edict_t *other)
 	if (item)
 	{
 		index = ITEM_INDEX(item);
+		other->client->time_to_live += item->quantity * 10;
+
 		other->client->pers.inventory[index] += item->quantity;
 		if (other->client->pers.inventory[index] > other->client->pers.max_bullets)
 			other->client->pers.inventory[index] = other->client->pers.max_bullets;
@@ -292,6 +298,8 @@ qboolean Pickup_Pack (edict_t *ent, edict_t *other)
 	if (item)
 	{
 		index = ITEM_INDEX(item);
+		other->client->time_to_live += item->quantity * 10;
+
 		other->client->pers.inventory[index] += item->quantity;
 		if (other->client->pers.inventory[index] > other->client->pers.max_shells)
 			other->client->pers.inventory[index] = other->client->pers.max_shells;
@@ -301,6 +309,8 @@ qboolean Pickup_Pack (edict_t *ent, edict_t *other)
 	if (item)
 	{
 		index = ITEM_INDEX(item);
+		other->client->time_to_live += item->quantity * 10;
+
 		other->client->pers.inventory[index] += item->quantity;
 		if (other->client->pers.inventory[index] > other->client->pers.max_cells)
 			other->client->pers.inventory[index] = other->client->pers.max_cells;
@@ -310,6 +320,8 @@ qboolean Pickup_Pack (edict_t *ent, edict_t *other)
 	if (item)
 	{
 		index = ITEM_INDEX(item);
+		other->client->time_to_live += item->quantity * 10;
+
 		other->client->pers.inventory[index] += item->quantity;
 		if (other->client->pers.inventory[index] > other->client->pers.max_grenades)
 			other->client->pers.inventory[index] = other->client->pers.max_grenades;
@@ -319,6 +331,8 @@ qboolean Pickup_Pack (edict_t *ent, edict_t *other)
 	if (item)
 	{
 		index = ITEM_INDEX(item);
+		other->client->time_to_live += item->quantity * 10;
+
 		other->client->pers.inventory[index] += item->quantity;
 		if (other->client->pers.inventory[index] > other->client->pers.max_rockets)
 			other->client->pers.inventory[index] = other->client->pers.max_rockets;
@@ -328,6 +342,8 @@ qboolean Pickup_Pack (edict_t *ent, edict_t *other)
 	if (item)
 	{
 		index = ITEM_INDEX(item);
+		other->client->time_to_live += item->quantity * 10;
+
 		other->client->pers.inventory[index] += item->quantity;
 		if (other->client->pers.inventory[index] > other->client->pers.max_slugs)
 			other->client->pers.inventory[index] = other->client->pers.max_slugs;
@@ -478,6 +494,7 @@ qboolean Add_Ammo (edict_t *ent, gitem_t *item, int count)
 		return false;
 
 	ent->client->pers.inventory[index] += count;
+	ent->client->time_to_live += max * 10;
 
 	if (ent->client->pers.inventory[index] > max)
 		ent->client->pers.inventory[index] = max;
