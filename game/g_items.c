@@ -771,10 +771,10 @@ void Use_Player_Flight(edict_t *ent, gitem_t *item)
 
 	ent->client->pers.inventory[ITEM_INDEX(item)]--;
 	ValidateSelectedItem(ent);
-	if (ent->client->player_speed_framenum > level.framenum)
-		ent->client->player_speed_framenum += 300;
+	if (ent->client->player_flight_framenum > level.framenum)
+		ent->client->player_flight_framenum += 300;
 	else
-		ent->client->player_speed_framenum = level.framenum + 300;
+		ent->client->player_flight_framenum = level.framenum + 300;
 
 }
 

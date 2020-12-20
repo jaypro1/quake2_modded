@@ -77,6 +77,7 @@ void BeginIntermission (edict_t *targ)
 
 	if (level.intermissiontime)
 		return;		// already activated
+	gi.dprintf("%s:%i:  Beginning Intermission\n", __FILE__, __LINE__);
 
 	game.autosaved = false;
 
@@ -485,6 +486,7 @@ void G_SetStats (edict_t *ent)
 		ent->client->ps.stats[STAT_TIME_HOURS] = 0;
 		ent->client->ps.stats[STAT_TIME_MINUTES] = 0;
 		ent->client->ps.stats[STAT_TIME_SECONDS] = 0;
+		gi.dprintf("%s:%i:  Killing player. \n", __FILE__, __LINE__);
 
 		player_die(ent, ent, ent, 100000, vec3_origin);
 	}							
