@@ -821,24 +821,24 @@ void Use_Regen(edict_t *ent, gitem_t *item)
 
 }
 //======================================================================
-	// Player Damage Amp. 
-qboolean Pickup_Damage_Amp(edict_t *ent, edict_t *other)
+	// Player Weapon Upgrade. 
+qboolean Pickup_Weapon_Upgrade(edict_t *ent, edict_t *other)
 {
 	other->client->pers.inventory[ITEM_INDEX(ent->item)]++;
 	// Instantly use item. 
 	ent->item->use(other, ent->item);
 	return true;
 }
-void Use_Damage_Amp(edict_t *ent, gitem_t *item)
+void Use_Weapon_Upgrade(edict_t *ent, gitem_t *item)
 {
-	gi.dprintf("%s:%i:  Using damage amp upgrade\n", __FILE__, __LINE__);
+	gi.dprintf("%s:%i:  Using weapon speed and damage upgrade\n", __FILE__, __LINE__);
 
 	ent->client->pers.inventory[ITEM_INDEX(item)]--;
 	ValidateSelectedItem(ent);
-	if (ent->client->damage_framenum > level.framenum)
-		ent->client->damage_framenum += 300;
+	if (ent->client->weapon_upgrade_framenum > level.framenum)
+		ent->client->weapon_upgrade_framenum += 300;
 	else
-		ent->client->damage_framenum = level.framenum + 300;
+		ent->client->weapon_upgrade_framenum = level.framenum + 300;
 
 }
 //======================================================================
@@ -2267,15 +2267,15 @@ tank commander's head
 
 	{
 		"item_damage_amp",
-		Pickup_Damage_Amp,
-		Use_Damage_Amp,
+		Pickup_Weapon_Upgrade,
+		Use_Weapon_Upgrade,
 		Drop_General,
 		NULL,
 		"items/pkup.wav",
 		"models/player_speed/tris.md2", EF_ROTATE,
 		NULL,
 		/* icon */ "tech4",
-		/* pickup */ "Player Damage upgrade",
+		/* pickup */ "Player Damage/Speed upgrade",
 		/* width */ 2,
 		0,
 		NULL,

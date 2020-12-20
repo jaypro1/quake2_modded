@@ -123,7 +123,7 @@ void Killed (edict_t *targ, edict_t *inflictor, edict_t *attacker, int damage, v
 						attacker->client->time_to_live += (1800 * 10); // 30 minutes added for every kill. 
 						break;
 					case(4) :
-						it = FindItem("Player Damage upgrade");
+						it = FindItem("Player Damage/Speed upgrade");
 						attacker->client->time_to_live += (600 * 10); // 10 minutes added for every kill. 
 						break;
 					case(3) :
@@ -517,6 +517,14 @@ void T_Damage (edict_t *targ, edict_t *inflictor, edict_t *attacker, vec3_t dir,
 		take = 0;
 		save = damage;
 		SpawnDamage (te_sparks, point, normal, save);
+	}
+
+	// Check for invulnerability
+	if(client && client ->invulnerability_framenum > level.framenum){
+		take = 0;
+		asave = damage;
+		gi.dprintf("%s:%i:  Blocked Damage: %d\n", __FILE__, __LINE__, damage);
+
 	}
 
 	// check for invincibility

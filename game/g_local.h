@@ -972,7 +972,7 @@ struct gclient_s
 	
 	int			invulnerability_framenum;
 
-	int			damage_framenum;
+	int			weapon_upgrade_framenum;
 	
 	int			killCount;
 	float		lastKill_framenum;

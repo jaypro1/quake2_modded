@@ -1339,7 +1339,7 @@ void ClientBegin (edict_t *ent)
 
 	ent->client->invulnerability_framenum = 0;
 
-	ent->client->damage_framenum = 0;
+	ent->client->weapon_upgrade_framenum = 0;
 
 
 	// Combo Effect initialization
