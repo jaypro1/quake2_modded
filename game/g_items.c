@@ -767,7 +767,7 @@ qboolean Pickup_Player_Flight(edict_t *ent, edict_t *other)
 }
 void Use_Player_Flight(edict_t *ent, gitem_t *item)
 {
-	gi.dprintf("%s:%i:  Using Player Speed\n", __FILE__, __LINE__);
+	gi.dprintf("%s:%i:  Using Player Flight\n", __FILE__, __LINE__);
 
 	ent->client->pers.inventory[ITEM_INDEX(item)]--;
 	ValidateSelectedItem(ent);
@@ -779,17 +779,68 @@ void Use_Player_Flight(edict_t *ent, gitem_t *item)
 }
 
 //======================================================================
-	// Weapon Speed
-
-//======================================================================
 	// invulnerability
+qboolean Pickup_Invulnerability(edict_t *ent, edict_t *other)
+{
+	other->client->pers.inventory[ITEM_INDEX(ent->item)]++;
+	// Instantly use item. 
+	ent->item->use(other, ent->item);
+	return true;
+}
+void Use_Invulnerability_Upgrade(edict_t *ent, gitem_t *item)
+{
+	gi.dprintf("%s:%i:  Using invulnerability upgrade\n", __FILE__, __LINE__);
 
+	ent->client->pers.inventory[ITEM_INDEX(item)]--;
+	ValidateSelectedItem(ent);
+	if (ent->client->invulnerability_framenum > level.framenum)
+		ent->client->invulnerability_framenum += 300;
+	else
+		ent->client->invulnerability_framenum = level.framenum + 300;
+
+}
 //======================================================================
 	// Player Regen
+qboolean Pickup_Regen(edict_t *ent, edict_t *other)
+{
+	other->client->pers.inventory[ITEM_INDEX(ent->item)]++;
+	// Instantly use item. 
+	ent->item->use(other, ent->item);
+	return true;
+}
+void Use_Regen(edict_t *ent, gitem_t *item)
+{
+	gi.dprintf("%s:%i:  Using regen upgrade\n", __FILE__, __LINE__);
 
+	ent->client->pers.inventory[ITEM_INDEX(item)]--;
+	ValidateSelectedItem(ent);
+	if (ent->client->regen_framenum > level.framenum)
+		ent->client->regen_framenum += 300;
+	else
+		ent->client->regen_framenum = level.framenum + 300;
+
+}
 //======================================================================
 	// Player Damage Amp. 
+qboolean Pickup_Damage_Amp(edict_t *ent, edict_t *other)
+{
+	other->client->pers.inventory[ITEM_INDEX(ent->item)]++;
+	// Instantly use item. 
+	ent->item->use(other, ent->item);
+	return true;
+}
+void Use_Damage_Amp(edict_t *ent, gitem_t *item)
+{
+	gi.dprintf("%s:%i:  Using damage amp upgrade\n", __FILE__, __LINE__);
 
+	ent->client->pers.inventory[ITEM_INDEX(item)]--;
+	ValidateSelectedItem(ent);
+	if (ent->client->damage_framenum > level.framenum)
+		ent->client->damage_framenum += 300;
+	else
+		ent->client->damage_framenum = level.framenum + 300;
+
+}
 //======================================================================
 
 /*
@@ -2151,7 +2202,7 @@ tank commander's head
 	},
 
 	{
-		"item_player_speed",
+		"item_player_flight",
 		Pickup_Player_Flight,
 		Use_Player_Flight,
 		Drop_General,
@@ -2169,7 +2220,71 @@ tank commander's head
 		NULL,
 		0,
 		/* precache */ ""
-	},
+	}
+	,
+
+	{
+		"item_invulnerability",
+		Pickup_Invulnerability,
+		Use_Invulnerability_Upgrade,
+		Drop_General,
+		NULL,
+		"items/pkup.wav",
+		"models/player_speed/tris.md2", EF_ROTATE,
+		NULL,
+		/* icon */ "tech2",
+		/* pickup */ "Player Invulnerability upgrade",
+		/* width */ 2,
+		0,
+		NULL,
+		IT_STAY_COOP | IT_POWERUP,
+		0,
+		NULL,
+		0,
+		/* precache */ ""
+	}, 
+
+	{
+		"item_regen",
+		Pickup_Regen,
+		Use_Regen,
+		Drop_General,
+		NULL,
+		"items/pkup.wav",
+		"models/player_speed/tris.md2", EF_ROTATE,
+		NULL,
+		/* icon */ "tech3",
+		/* pickup */ "Player Regen upgrade",
+		/* width */ 2,
+		0,
+		NULL,
+		IT_STAY_COOP | IT_POWERUP,
+		0,
+		NULL,
+		0,
+		/* precache */ ""
+	}, 
+
+	{
+		"item_damage_amp",
+		Pickup_Damage_Amp,
+		Use_Damage_Amp,
+		Drop_General,
+		NULL,
+		"items/pkup.wav",
+		"models/player_speed/tris.md2", EF_ROTATE,
+		NULL,
+		/* icon */ "tech4",
+		/* pickup */ "Player Damage upgrade",
+		/* width */ 2,
+		0,
+		NULL,
+		IT_STAY_COOP | IT_POWERUP,
+		0,
+		NULL,
+		0,
+		/* precache */ ""
+	}, 
 
 	// end of list marker
 	{NULL}

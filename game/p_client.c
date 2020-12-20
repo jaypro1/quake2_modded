@@ -1635,6 +1635,16 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 	}
 
 
+	// Regen upgrade
+	if (ent->client->regen_framenum > level.framenum & (ent->client->regen_framenum - level.framenum) % 30 == 0){
+		// do regen every 3 second. // max health upto 1.5 times max health
+
+		gi.dprintf("%s:%i:  Regening\n", __FILE__, __LINE__);
+
+		if (ent->health < ent->max_health * 1.5){
+			ent->health += 3;
+		}
+	}
 
 	if (level.intermissiontime)
 	{

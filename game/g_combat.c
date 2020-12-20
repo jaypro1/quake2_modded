@@ -104,7 +104,6 @@ void Killed (edict_t *targ, edict_t *inflictor, edict_t *attacker, int damage, v
 			// Called once, for every monster kill
 			if (attacker->client){
 				// run only if client
-				attacker->client->time_to_live += (30 * 10); // 30 seconds added for every kill. 
 
 
 				if (attacker->client->lastKill_framenum + 100 > level.framenum){
@@ -120,18 +119,24 @@ void Killed (edict_t *targ, edict_t *inflictor, edict_t *attacker, int damage, v
 				switch (attacker->client->killCount)
 				{
 					case(5) :
-						it = FindItem("Player Flight upgrade");
+						it = FindItem("Player Invulnerability upgrade");
+						attacker->client->time_to_live += (1800 * 10); // 30 minutes added for every kill. 
 						break;
 					case(4) :
-						it = FindItem("Player Flight upgrade");
+						it = FindItem("Player Damage upgrade");
+						attacker->client->time_to_live += (600 * 10); // 10 minutes added for every kill. 
 						break;
 					case(3) :
-						it = FindItem("Player Flight upgrade");
+						it = FindItem("Player Regen upgrade");
+						attacker->client->time_to_live += (300 * 10); // 5 minutes added for every kill. 
 						break;
 					case(2) :
+						attacker->client->time_to_live += (60 * 10); // 1 minute added for every kill. 
 						it = FindItem("Player Flight upgrade");
+
 						break;
 					case(1) :
+						attacker->client->time_to_live += (30 * 10); // 30 seconds added for every kill. 
 						break;
 					default:
 						break;
