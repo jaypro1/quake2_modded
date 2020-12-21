@@ -33,7 +33,10 @@ Features:
   - 5 kill combo cap. So kill combo resets after that
   - Each kill combo from 2-5 will give different powerups
   
-  Highscores List: To Be Implemented.
+  Highscores List: INCOMPLETE
+  
+  To Check the highscores, open console and type "leaderboard"
+  * currently data is fake * This will change when the addHighscore <name> <score> works properly
 
 
 
