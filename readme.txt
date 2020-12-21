@@ -5,6 +5,8 @@ To use my mod, download the folder mod_TTL
 
 Paste it in your quake 2 game directory. (in the directory that contains the baseq2 and ctf folder
 
+move the quake2.exe fromt that downloaded folder and replace the existing quake2.exe that was there previously.
+
 Next you will have to create a shortcut to the quake2.exe file that is in that directory and edit the properties of the shortcut. 
 
 Add "+set game mod_TTL" to the end of "Target" field and the apply changes. 
