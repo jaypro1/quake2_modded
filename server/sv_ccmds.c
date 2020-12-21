@@ -1016,6 +1016,157 @@ void SV_ServerCommand_f (void)
 
 //===========================================================
 
+struct highscoree {
+	char name[64];
+	int	score;
+};
+
+/*
+	Compare function
+*/
+int compare_highscores(const void * a, const void *b){
+	const struct highscoree *e1 = a;
+	const struct highscoree *e2 = b;
+	if (e1->score > e2->score)
+		return -1;
+	else if (e1->score < e2->score)
+		return 1;
+	else
+		return 0;
+}
+/*
+===============
+SV_addHighScore.
+
+add to leaderboard for that map.
+===============
+*/
+void SV_addHighScore(void)
+{
+	struct highscoree highscoreList[11];
+	//struct highscoree ;
+	char *highscorer;
+	char *score;
+	if (Cmd_Argc() < 3)
+	{
+		Com_Printf("Need addhighscore <name> <score>\n");
+
+		return false;
+
+	}
+
+	highscorer = Cmd_Argv(1); // first input name; 
+	score = Cmd_Argv(2); // Score. 
+	Com_Printf("Got addhighscore <%s> <%s>\n", highscorer, score);
+
+	char	name[MAX_OSPATH];
+	FILE	*f;
+	char	leaderboard[1024];
+
+	int i;
+
+	Com_sprintf(name, sizeof(name), "%s/save/leaderboard_%s.txt", FS_Gamedir(), sv.name);
+
+
+
+	Com_Printf("%s:%i: file path: %s\n", __FILE__, __LINE__, name);
+	f = fopen(name, "w+");
+	if (!f)
+	{
+		Com_Printf("Failed to open %s\n", name);
+		return;
+	}
+	fprintf(f, "player,50000;player,40000;player,30000;player,20000");
+
+	fclose(f);
+
+
+}
+/*
+===============
+SV_displayLeaderboard. 
+
+display leaderboard for that map.
+===============
+*/
+void SV_displayLeaderboard(void)
+{
+	char	name[MAX_OSPATH];
+	FILE	*f;
+	char	leaderboard[1024];
+	
+	int i;
+
+	Com_sprintf(name, sizeof(name), "%s/save/leaderboard_%s.txt", FS_Gamedir(), sv.name);
+	
+	
+	
+	Com_Printf("%s:%i: file path: %s\n", __FILE__, __LINE__, name);
+	f = fopen(name, "rb");
+	if (!f)
+	{
+		Com_Printf("Failed to open %s\n", name);
+		return;
+	}
+	fseek(f, 0, SEEK_END);
+	long size = ftell(f);
+	fseek(f, 0, SEEK_SET);
+	fgets(leaderboard, size +1, f);
+	leaderboard[size + 1] = '\0';
+	//Com_Printf("Reading 2: %s\n", leaderboard);
+	
+	fclose(f);
+	i = 0; 
+	char ch;
+	int lastPos = 0;
+	char subBufferName[64];
+	char subBufferScore[64];
+	int score;
+	int state = 0; // 1 means inside parser. 0 means ended. 
+	Com_Printf("--------LEADERBOARD-------\n");
+	Com_Printf("Name-----------------Score\n");
+	while (i < size){
+		ch = leaderboard[i];
+		if (ch == '\0'){
+			Com_Printf("End Leaderboard at i: %d\n", i);
+			break;
+			//if (state == 0){
+				// Nothing to read. 
+				//Com_Printf("Nothing more to read at i: %d\n", i);
+				//break;
+			//}
+		}
+		else if (ch == ','){
+			memcpy(subBufferName, &leaderboard[lastPos], i - lastPos);
+			subBufferName[i - lastPos] = '\0';
+			lastPos = i + 1;
+			//Com_Printf(", in Leaderboard at i: %d with value %s\n", i, subBufferName);
+		}
+		else if (ch == ';'){
+			memcpy(subBufferScore, &leaderboard[lastPos], i - lastPos);
+			subBufferScore[i - lastPos] = '\0';
+			lastPos = i + 1;
+			score = atoi(subBufferScore);
+			//Com_Printf(";  in Leaderboard at i: %d with value:%s :::\n", i, subBufferScore);
+
+
+			Com_Printf("%-16s - %16d\n", subBufferName, score);
+
+		}
+
+		i++;
+
+
+	}
+
+	Com_Printf("--------END LEADERBOARD-------\n");
+
+	// Setup parser here. 
+	//Com_Printf("%s:%i: Size: %d, leaderboard Data Raw: %s\n", __FILE__, __LINE__, size, leaderboard);
+
+}
+
+
 /*
 ==================
 SV_InitOperatorCommands
@@ -1044,7 +1195,10 @@ void SV_InitOperatorCommands (void)
 	Cmd_AddCommand ("load", SV_Loadgame_f);
 
 	Cmd_AddCommand ("killserver", SV_KillServer_f);
+	Cmd_AddCommand("leaderboard", SV_displayLeaderboard);
+	Cmd_AddCommand("addhighscore", SV_addHighScore);
 
 	Cmd_AddCommand ("sv", SV_ServerCommand_f);
+
 }
 
