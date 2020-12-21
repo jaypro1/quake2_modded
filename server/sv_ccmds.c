@@ -1043,7 +1043,6 @@ add to leaderboard for that map.
 */
 void SV_addHighScore(void)
 {
-	struct highscoree highscoreList[11];
 	//struct highscoree ;
 	char *highscorer;
 	char *score;
@@ -1051,7 +1050,7 @@ void SV_addHighScore(void)
 	{
 		Com_Printf("Need addhighscore <name> <score>\n");
 
-		return false;
+		return;
 
 	}
 
@@ -1061,9 +1060,7 @@ void SV_addHighScore(void)
 
 	char	name[MAX_OSPATH];
 	FILE	*f;
-	char	leaderboard[1024];
-
-	int i;
+	
 
 	Com_sprintf(name, sizeof(name), "%s/save/leaderboard_%s.txt", FS_Gamedir(), sv.name);
 
@@ -1122,7 +1119,6 @@ void SV_displayLeaderboard(void)
 	char subBufferName[64];
 	char subBufferScore[64];
 	int score;
-	int state = 0; // 1 means inside parser. 0 means ended. 
 	Com_Printf("--------LEADERBOARD-------\n");
 	Com_Printf("Name-----------------Score\n");
 	while (i < size){
