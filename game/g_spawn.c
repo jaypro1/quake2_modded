@@ -744,6 +744,45 @@ char *single_statusbar =
 "	xr	-950 "
 "	string \"Kill Combo\""
 "endif "
+
+// Power Ups
+"if 23 "
+"	yt	600 "
+"	xl	50 "
+"	num 2	23 "
+"	yt	600 "
+"	xl	100 "
+"	string \"Flight\""
+"endif "
+
+"if 24 "
+"	yt	650 "
+"	xl	50 "
+"	num 2	24 "
+"	yt	650 "
+"	xl	100 "
+"	string \"Regen\""
+"endif "
+
+"if 25 "
+"	yt	700 "
+"	xl	50 "
+"	num 2	25 "
+"	yt	700 "
+"	xl	100 "
+"	string \"WP Upgrade\""
+"endif "
+
+"if 26 "
+"	yt	750 "
+"	xl	50 "
+"	num 2	26 "
+"	yt	750 "
+"	xl	100 "
+"	string \"INVULNERABILITY\""
+"endif "
+
+
 ;
 
 char *dm_statusbar =

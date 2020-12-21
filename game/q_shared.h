@@ -1016,6 +1016,10 @@ typedef enum
 #define COMBO_TIME				21
 #define COMBO_TEXT				22
 
+#define FLIGHT					23
+#define REGEN					24
+#define WPUPGRADE				25
+#define INVULNERABILITY			26
 
 #define	MAX_STATS				32
 
