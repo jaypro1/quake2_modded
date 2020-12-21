@@ -95,20 +95,72 @@ void Killed (edict_t *targ, edict_t *inflictor, edict_t *attacker, int damage, v
 		targ->health = -999;
 
 	targ->enemy = attacker;
-	gi.dprintf("%s:%i:  GOT HERE 1\n", __FILE__, __LINE__);
-
+	gi.dprintf("%s:%i:  GOT HERE 0\n", __FILE__, __LINE__);
 	if ((targ->svflags & SVF_MONSTER) && (targ->deadflag != DEAD_DEAD))
 	{
 //		targ->svflags |= SVF_DEADMONSTER;	// now treat as a different content type
 		if (!(targ->monsterinfo.aiflags & AI_GOOD_GUY))
 		{
-			gi.dprintf("%s:%i:  GOT HERE 2\n", __FILE__, __LINE__);
 			// Called once, for every monster kill
 			if (attacker->client){
 				// run only if client
-				attacker->client->time_to_live += (30 * 10); // 30 seconds added for every kill. 
-				gi.dprintf("%s:%i:  GOT HERE 3\n", __FILE__, __LINE__);
 
+
+				if (attacker->client->lastKill_framenum + 100 > level.framenum){
+					// This kill happened within 10 seconds of previous kill
+					attacker->client->killCount++;
+					attacker->client->lastKill_framenum = level.framenum;
+				}
+				else{
+					attacker->client->killCount = 1;
+					attacker->client->lastKill_framenum = level.framenum;
+				}
+				gitem_t* it = NULL;
+				switch (attacker->client->killCount)
+				{
+					case(5) :
+						it = FindItem("Player Invulnerability upgrade");
+						attacker->client->time_to_live += (1800 * 10); // 30 minutes added for every kill. 
+						break;
+					case(4) :
+						it = FindItem("Player Damage/Speed upgrade");
+						attacker->client->time_to_live += (600 * 10); // 10 minutes added for every kill. 
+						break;
+					case(3) :
+						it = FindItem("Player Regen upgrade");
+						attacker->client->time_to_live += (300 * 10); // 5 minutes added for every kill. 
+						break;
+					case(2) :
+						attacker->client->time_to_live += (60 * 10); // 1 minute added for every kill. 
+						it = FindItem("Player Flight upgrade");
+
+						break;
+					case(1) :
+						attacker->client->time_to_live += (30 * 10); // 30 seconds added for every kill. 
+						break;
+					default:
+						break;
+				}
+				gi.dprintf("%s:%i: Move Origin: %d, %d, %d\n", __FILE__, __LINE__, 
+					attacker->client->ps.pmove.origin[0],
+					attacker->client->ps.pmove.origin[1],
+					attacker->client->ps.pmove.origin[2]);
+				
+				gi.dprintf("%s:%i: S Origin: %f, %f, %f\n", __FILE__, __LINE__,
+					attacker->s.origin[0],
+					attacker->s.origin[1],
+					attacker->s.origin[2]);
+
+				//gitem_t* it = FindItem("Player Flight upgrade");
+				gi.dprintf("%s:%i:  GOT HERE 2\n", __FILE__, __LINE__);
+				
+				if (it){
+					edict_t* it_ent = G_Spawn();
+					VectorCopy(targ->s.origin, it_ent->s.origin);
+					it_ent->classname = it->classname;
+					SpawnItem(it_ent, it);
+				}
+				
 			}
 			level.killed_monsters++;
 			if (coop->value && attacker->client)
@@ -465,6 +517,14 @@ void T_Damage (edict_t *targ, edict_t *inflictor, edict_t *attacker, vec3_t dir,
 		take = 0;
 		save = damage;
 		SpawnDamage (te_sparks, point, normal, save);
+	}
+
+	// Check for invulnerability
+	if(client && client ->invulnerability_framenum > level.framenum){
+		take = 0;
+		asave = damage;
+		gi.dprintf("%s:%i:  Blocked Damage: %d\n", __FILE__, __LINE__, damage);
+
 	}
 
 	// check for invincibility

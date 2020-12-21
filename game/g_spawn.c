@@ -290,10 +290,13 @@ void ED_CallSpawn (edict_t *ent)
 	// check item spawn functions
 	for (i=0,item=itemlist ; i<game.num_items ; i++,item++)
 	{
+		
 		if (!item->classname)
 			continue;
 		if (!strcmp(item->classname, ent->classname))
 		{	// found it
+			gi.dprintf("%s:%i:  Class: %s , Origin: %s \n", __FILE__, __LINE__,
+				item->classname, vtos(ent->s.origin));
 			SpawnItem (ent, item);
 			return;
 		}
@@ -549,6 +552,7 @@ void SpawnEntities (char *mapname, char *entities, char *spawnpoint)
 
 	ent = NULL;
 	inhibit = 0;
+	gi.dprintf("%s:%i:  GOT Map: %s\n", __FILE__, __LINE__,mapname);
 
 // parse ents
 	while (1)
@@ -722,6 +726,63 @@ char *single_statusbar =
 "	xr	-50 "
 "	num	2	20 "
 "endif "
+
+"if 21 "
+"	yt	50 "
+"	xr	-800 "
+"	num	2	21 "
+"	yt	50 "
+"	xr	-750 "
+"	string \"Sec\""
+"endif "
+
+"if 22 "
+"	yt	50 "
+"	xr	-1000 "
+"	num 2	22 "
+"	yt	50 "
+"	xr	-950 "
+"	string \"Kill Combo\""
+"endif "
+
+// Power Ups
+"if 23 "
+"	yt	600 "
+"	xl	50 "
+"	num 2	23 "
+"	yt	600 "
+"	xl	100 "
+"	string \"Flight\""
+"endif "
+
+"if 24 "
+"	yt	650 "
+"	xl	50 "
+"	num 2	24 "
+"	yt	650 "
+"	xl	100 "
+"	string \"Regen\""
+"endif "
+
+"if 25 "
+"	yt	700 "
+"	xl	50 "
+"	num 2	25 "
+"	yt	700 "
+"	xl	100 "
+"	string \"WP Upgrade\""
+"endif "
+
+"if 26 "
+"	yt	750 "
+"	xl	50 "
+"	num 2	26 "
+"	yt	750 "
+"	xl	100 "
+"	string \"INVULNERABILITY\""
+"endif "
+
+
 ;
 
 char *dm_statusbar =

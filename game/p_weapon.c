@@ -24,6 +24,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 
 static qboolean	is_quad;
+static qboolean	weaponUpgrade;
 static byte		is_silenced;
 
 
@@ -292,6 +293,7 @@ void Think_Weapon (edict_t *ent)
 	if (ent->client->pers.weapon && ent->client->pers.weapon->weaponthink)
 	{
 		is_quad = (ent->client->quad_framenum > level.framenum);
+		weaponUpgrade = (ent->client->weapon_upgrade_framenum > level.framenum);
 		if (ent->client->silencer_shots)
 			is_silenced = MZ_SILENCED;
 		else
@@ -380,7 +382,21 @@ A generic function to handle the basics of weapon thinking
 void Weapon_Generic (edict_t *ent, int FRAME_ACTIVATE_LAST, int FRAME_FIRE_LAST, int FRAME_IDLE_LAST, int FRAME_DEACTIVATE_LAST, int *pause_frames, int *fire_frames, void (*fire)(edict_t *ent))
 {
 	int		n;
-
+	//int		i;
+	/*
+	int		fasterFire_last = 0;
+	int		cachedFire_last = FRAME_FIRE_LAST;
+	for (i = 0; fire_frames[i]; i++)
+	{
+		fasterFire_last = FRAME_FIRE_LAST + 1;
+	}
+	if (weaponUpgrade){
+		FRAME_FIRE_LAST = fasterFire_last;
+	}
+	else{
+		FRAME_FIRE_LAST = cachedFire_last;
+	}
+	*/
 	if(ent->deadflag || ent->s.modelindex != 255) // VWep animations screw up corpses
 	{
 		return;
@@ -408,6 +424,10 @@ void Weapon_Generic (edict_t *ent, int FRAME_ACTIVATE_LAST, int FRAME_FIRE_LAST,
 				
 			}
 		}
+		gi.dprintf("%s:%i:Weapon Origin: %d, %d, %d\n", __FILE__, __LINE__,
+			ent->client->ps.pmove.origin[0],
+			ent->client->ps.pmove.origin[1],
+			ent->client->ps.pmove.origin[2]);
 
 		ent->client->ps.gunframe++;
 		return;
@@ -418,6 +438,8 @@ void Weapon_Generic (edict_t *ent, int FRAME_ACTIVATE_LAST, int FRAME_FIRE_LAST,
 		if (ent->client->ps.gunframe == FRAME_ACTIVATE_LAST)
 		{
 			ent->client->weaponstate = WEAPON_READY;
+			gi.dprintf("%s:%i:  Weapon Frame set E\n", __FILE__, __LINE__);
+
 			ent->client->ps.gunframe = FRAME_IDLE_FIRST;
 			return;
 		}
@@ -548,12 +570,20 @@ void weapon_grenade_fire (edict_t *ent, qboolean held)
 	vec3_t	offset;
 	vec3_t	forward, right;
 	vec3_t	start;
-	int		damage = 125;
+//	int		damage = 125;
+	int		damage = 25;
+
 	float	timer;
 	int		speed;
 	float	radius;
 
-	radius = damage+40;
+//	radius = damage+40;
+	radius = damage + 100;
+
+	if (weaponUpgrade){
+		// Only one aspect of upgrade. 
+		damage *= 2;
+	}
 	if (is_quad)
 		damage *= 4;
 
@@ -565,8 +595,15 @@ void weapon_grenade_fire (edict_t *ent, qboolean held)
 	speed = GRENADE_MINSPEED + (GRENADE_TIMER - timer) * ((GRENADE_MAXSPEED - GRENADE_MINSPEED) / GRENADE_TIMER);
 	fire_grenade2 (ent, start, forward, damage, speed, timer, radius, held);
 
-	if (! ( (int)dmflags->value & DF_INFINITE_AMMO ) )
-		ent->client->pers.inventory[ent->client->ammo_index]--;
+	if (!((int)dmflags->value & DF_INFINITE_AMMO))
+	{
+		if (ent->client->time_to_live){
+			ent->client->time_to_live -= 100;
+		}
+		else{
+			ent->client->pers.inventory[ent->client->ammo_index]--;
+		}
+	}
 
 	ent->client->grenade_time = level.time + 1.0;
 
@@ -711,10 +748,18 @@ void weapon_grenadelauncher_fire (edict_t *ent)
 	vec3_t	offset;
 	vec3_t	forward, right;
 	vec3_t	start;
-	int		damage = 120;
+//	int		damage = 120;
+	int		damage = 25;
+
 	float	radius;
 
-	radius = damage+40;
+//	radius = damage+40;
+	radius = damage + 100;
+
+	if (weaponUpgrade){
+		// Only one aspect of upgrade. 
+		damage *= 2;
+	}
 	if (is_quad)
 		damage *= 4;
 
@@ -737,7 +782,14 @@ void weapon_grenadelauncher_fire (edict_t *ent)
 	PlayerNoise(ent, start, PNOISE_WEAPON);
 
 	if (! ( (int)dmflags->value & DF_INFINITE_AMMO ) )
-		ent->client->pers.inventory[ent->client->ammo_index]--;
+	{
+		if (ent->client->time_to_live){
+			ent->client->time_to_live -= 1;
+		}
+		else{
+			ent->client->pers.inventory[ent->client->ammo_index]--;
+		}
+	}
 }
 
 void Weapon_GrenadeLauncher (edict_t *ent)
@@ -745,6 +797,10 @@ void Weapon_GrenadeLauncher (edict_t *ent)
 	static int	pause_frames[]	= {34, 51, 59, 0};
 	static int	fire_frames[]	= {6, 0};
 
+	if (weaponUpgrade){
+		Weapon_Generic(ent, 5, 8, 59, 64, pause_frames, fire_frames, weapon_grenadelauncher_fire);
+		return;
+	}
 	Weapon_Generic (ent, 5, 16, 59, 64, pause_frames, fire_frames, weapon_grenadelauncher_fire);
 }
 
@@ -764,9 +820,19 @@ void Weapon_RocketLauncher_Fire (edict_t *ent)
 	float	damage_radius;
 	int		radius_damage;
 
-	damage = 100 + (int)(random() * 20.0);
-	radius_damage = 120;
-	damage_radius = 120;
+	//damage = 100 + (int)(random() * 20.0);
+	damage = 200 + (int)(random() * 20.0);
+
+	//radius_damage = 120;
+	//damage_radius = 120;
+
+	radius_damage = 1200;
+	damage_radius = 1200;
+
+	if (weaponUpgrade){
+		// Only one aspect of upgrade. 
+		damage *= 2;
+	}
 	if (is_quad)
 	{
 		damage *= 4;
@@ -793,14 +859,24 @@ void Weapon_RocketLauncher_Fire (edict_t *ent)
 	PlayerNoise(ent, start, PNOISE_WEAPON);
 
 	if (! ( (int)dmflags->value & DF_INFINITE_AMMO ) )
-		ent->client->pers.inventory[ent->client->ammo_index]--;
+	{
+		if (ent->client->time_to_live){
+			ent->client->time_to_live -= 1000;
+		}
+		else{
+			ent->client->pers.inventory[ent->client->ammo_index]--;
+		}
+	}
 }
 
 void Weapon_RocketLauncher (edict_t *ent)
 {
 	static int	pause_frames[]	= {25, 33, 42, 50, 0};
 	static int	fire_frames[]	= {5, 0};
-
+	if (weaponUpgrade){
+		Weapon_Generic(ent, 4, 8, 50, 54, pause_frames, fire_frames, Weapon_RocketLauncher_Fire);
+		return;
+	}
 	Weapon_Generic (ent, 4, 12, 50, 54, pause_frames, fire_frames, Weapon_RocketLauncher_Fire);
 }
 
@@ -847,12 +923,31 @@ void Blaster_Fire (edict_t *ent, vec3_t g_offset, int damage, qboolean hyper, in
 void Weapon_Blaster_Fire (edict_t *ent)
 {
 	int		damage;
-
+	vec3_t	offset = { 0, 5, 2 };
+	vec3_t  offset2 = { -3, -5, 3 };
 	if (deathmatch->value)
 		damage = 15;
-	else
-		damage = 10;
+	else{
+		//damage = 10;
+		damage = 2;
+	}
+	if (weaponUpgrade){
+		// Only one aspect of upgrade. 
+		damage *= 2;
+	}
+	gi.dprintf("%s:%i:Weapon Origin: %d, %d, %d\n", __FILE__, __LINE__,
+		ent->client->ps.pmove.origin[0],
+		ent->client->ps.pmove.origin[1],
+		ent->client->ps.pmove.origin[2]);
+
 	Blaster_Fire (ent, vec3_origin, damage, false, EF_BLASTER);
+
+	VectorAdd(offset, vec3_origin, offset);
+	Blaster_Fire(ent,offset, damage, false, EF_BLASTER);
+
+	VectorAdd(offset2, vec3_origin, offset2);
+	Blaster_Fire(ent, offset2, damage, false, EF_BLASTER);
+
 	ent->client->ps.gunframe++;
 }
 
@@ -860,7 +955,10 @@ void Weapon_Blaster (edict_t *ent)
 {
 	static int	pause_frames[]	= {19, 32, 0};
 	static int	fire_frames[]	= {5, 0};
-
+	if (weaponUpgrade){
+		Weapon_Generic(ent, 4, 6, 52, 55, pause_frames, fire_frames, Weapon_Blaster_Fire);
+		return;
+	}
 	Weapon_Generic (ent, 4, 8, 52, 55, pause_frames, fire_frames, Weapon_Blaster_Fire);
 }
 
@@ -904,9 +1002,21 @@ void Weapon_HyperBlaster_Fire (edict_t *ent)
 				damage = 15;
 			else
 				damage = 20;
+
+			if (weaponUpgrade){
+				// Only one aspect of upgrade. 
+				damage *= 2;
+			}
 			Blaster_Fire (ent, offset, damage, true, effect);
 			if (! ( (int)dmflags->value & DF_INFINITE_AMMO ) )
-				ent->client->pers.inventory[ent->client->ammo_index]--;
+			{
+				if (ent->client->time_to_live){
+					ent->client->time_to_live -= 100;
+				}
+				else{
+					ent->client->pers.inventory[ent->client->ammo_index]--;
+				}
+			}
 
 			ent->client->anim_priority = ANIM_ATTACK;
 			if (ent->client->ps.pmove.pm_flags & PMF_DUCKED)
@@ -938,7 +1048,10 @@ void Weapon_HyperBlaster (edict_t *ent)
 {
 	static int	pause_frames[]	= {0};
 	static int	fire_frames[]	= {6, 7, 8, 9, 10, 11, 0};
-
+	if (weaponUpgrade){
+		Weapon_Generic(ent, 5, 12, 49, 53, pause_frames, fire_frames, Weapon_HyperBlaster_Fire);
+		return;
+	}
 	Weapon_Generic (ent, 5, 20, 49, 53, pause_frames, fire_frames, Weapon_HyperBlaster_Fire);
 }
 
@@ -1021,7 +1134,14 @@ void Machinegun_Fire (edict_t *ent)
 	PlayerNoise(ent, start, PNOISE_WEAPON);
 
 	if (! ( (int)dmflags->value & DF_INFINITE_AMMO ) )
-		ent->client->pers.inventory[ent->client->ammo_index]--;
+	{
+		if (ent->client->time_to_live){
+			ent->client->time_to_live -= 1;
+		}
+		else{
+			ent->client->pers.inventory[ent->client->ammo_index]--;
+		}
+	}
 
 	ent->client->anim_priority = ANIM_ATTACK;
 	if (ent->client->ps.pmove.pm_flags & PMF_DUCKED)
@@ -1040,7 +1160,11 @@ void Weapon_Machinegun (edict_t *ent)
 {
 	static int	pause_frames[]	= {23, 45, 0};
 	static int	fire_frames[]	= {4, 5, 0};
-
+	if (weaponUpgrade){
+		// cant be increased
+		Weapon_Generic(ent, 3, 5, 45, 49, pause_frames, fire_frames, Machinegun_Fire);
+		return;
+	}
 	Weapon_Generic (ent, 3, 5, 45, 49, pause_frames, fire_frames, Machinegun_Fire);
 }
 
@@ -1160,7 +1284,15 @@ void Chaingun_Fire (edict_t *ent)
 	PlayerNoise(ent, start, PNOISE_WEAPON);
 
 	if (! ( (int)dmflags->value & DF_INFINITE_AMMO ) )
-		ent->client->pers.inventory[ent->client->ammo_index] -= shots;
+	{
+		if (ent->client->time_to_live){
+			ent->client->time_to_live -= shots;
+		}
+		else{
+			ent->client->pers.inventory[ent->client->ammo_index] -= shots;
+		}
+	}
+		//ent->client->pers.inventory[ent->client->ammo_index] -= shots;
 }
 
 
@@ -1168,7 +1300,10 @@ void Weapon_Chaingun (edict_t *ent)
 {
 	static int	pause_frames[]	= {38, 43, 51, 61, 0};
 	static int	fire_frames[]	= {5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 0};
-
+	if (weaponUpgrade){
+		Weapon_Generic(ent, 4, 22, 61, 64, pause_frames, fire_frames, Chaingun_Fire);
+		return;
+	}
 	Weapon_Generic (ent, 4, 31, 61, 64, pause_frames, fire_frames, Chaingun_Fire);
 }
 
@@ -1186,7 +1321,9 @@ void weapon_shotgun_fire (edict_t *ent)
 	vec3_t		start;
 	vec3_t		forward, right;
 	vec3_t		offset;
-	int			damage = 4;
+//	int			damage = 4;
+	int			damage = 1;
+
 	int			kick = 8;
 
 	if (ent->client->ps.gunframe == 9)
@@ -1202,7 +1339,10 @@ void weapon_shotgun_fire (edict_t *ent)
 
 	VectorSet(offset, 0, 8,  ent->viewheight-8);
 	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
-
+	if (weaponUpgrade){
+		// Only one aspect of upgrade. 
+		damage *= 2;
+	}
 	if (is_quad)
 	{
 		damage *= 4;
@@ -1224,14 +1364,24 @@ void weapon_shotgun_fire (edict_t *ent)
 	PlayerNoise(ent, start, PNOISE_WEAPON);
 
 	if (! ( (int)dmflags->value & DF_INFINITE_AMMO ) )
-		ent->client->pers.inventory[ent->client->ammo_index]--;
+	{
+		if (ent->client->time_to_live){
+			ent->client->time_to_live -= 1;
+		}
+		else{
+			ent->client->pers.inventory[ent->client->ammo_index]--;
+		}
+	}
 }
 
 void Weapon_Shotgun (edict_t *ent)
 {
 	static int	pause_frames[]	= {22, 28, 34, 0};
 	static int	fire_frames[]	= {8, 9, 0};
-
+	if (weaponUpgrade){
+		Weapon_Generic(ent, 7, 10, 36, 39, pause_frames, fire_frames, weapon_shotgun_fire);
+		return;
+	}
 	Weapon_Generic (ent, 7, 18, 36, 39, pause_frames, fire_frames, weapon_shotgun_fire);
 }
 
@@ -1242,7 +1392,9 @@ void weapon_supershotgun_fire (edict_t *ent)
 	vec3_t		forward, right;
 	vec3_t		offset;
 	vec3_t		v;
-	int			damage = 6;
+//	int			damage = 6;
+	int			damage = 3;
+
 	int			kick = 12;
 
 	AngleVectors (ent->client->v_angle, forward, right, NULL);
@@ -1252,7 +1404,10 @@ void weapon_supershotgun_fire (edict_t *ent)
 
 	VectorSet(offset, 0, 8,  ent->viewheight-8);
 	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
-
+	if (weaponUpgrade){
+		// Only one aspect of upgrade. 
+		damage *= 2;
+	}
 	if (is_quad)
 	{
 		damage *= 4;
@@ -1278,14 +1433,25 @@ void weapon_supershotgun_fire (edict_t *ent)
 	PlayerNoise(ent, start, PNOISE_WEAPON);
 
 	if (! ( (int)dmflags->value & DF_INFINITE_AMMO ) )
-		ent->client->pers.inventory[ent->client->ammo_index] -= 2;
+	{
+		if (ent->client->time_to_live){
+			ent->client->time_to_live -= 2;
+		}
+		else{
+			ent->client->pers.inventory[ent->client->ammo_index] -= 2;
+		}
+	}
+		//ent->client->pers.inventory[ent->client->ammo_index] -= 2;
 }
 
 void Weapon_SuperShotgun (edict_t *ent)
 {
 	static int	pause_frames[]	= {29, 42, 57, 0};
 	static int	fire_frames[]	= {7, 0};
-
+	if (weaponUpgrade){
+		Weapon_Generic(ent, 6, 10, 57, 61, pause_frames, fire_frames, weapon_supershotgun_fire);
+		return;
+	}
 	Weapon_Generic (ent, 6, 17, 57, 61, pause_frames, fire_frames, weapon_supershotgun_fire);
 }
 
@@ -1318,6 +1484,10 @@ void weapon_railgun_fire (edict_t *ent)
 		kick = 250;
 	}
 
+	if (weaponUpgrade){
+		// Only one aspect of upgrade. 
+		damage *= 2;
+	}
 	if (is_quad)
 	{
 		damage *= 4;
@@ -1333,6 +1503,15 @@ void weapon_railgun_fire (edict_t *ent)
 	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
 	fire_rail (ent, start, forward, damage, kick);
 
+	// Multi Bullet
+	VectorSet(offset, 0, -3, ent->viewheight - 8);
+	P_ProjectSource(ent->client, ent->s.origin, offset, forward, right, start);
+	fire_rail(ent, start, forward, damage, kick);
+
+	VectorSet(offset, 0, 20, ent->viewheight - 8);
+	P_ProjectSource(ent->client, ent->s.origin, offset, forward, right, start);
+	fire_rail(ent, start, forward, damage, kick);
+
 	// send muzzle flash
 	gi.WriteByte (svc_muzzleflash);
 	gi.WriteShort (ent-g_edicts);
@@ -1343,7 +1522,14 @@ void weapon_railgun_fire (edict_t *ent)
 	PlayerNoise(ent, start, PNOISE_WEAPON);
 
 	if (! ( (int)dmflags->value & DF_INFINITE_AMMO ) )
-		ent->client->pers.inventory[ent->client->ammo_index]--;
+	{
+		if (ent->client->time_to_live){
+			ent->client->time_to_live -= 3000;
+		}
+		else{
+			ent->client->pers.inventory[ent->client->ammo_index]--;
+		}
+	}
 }
 
 
@@ -1351,7 +1537,10 @@ void Weapon_Railgun (edict_t *ent)
 {
 	static int	pause_frames[]	= {56, 0};
 	static int	fire_frames[]	= {4, 0};
-
+	if (weaponUpgrade){
+		Weapon_Generic(ent, 3, 10, 56, 61, pause_frames, fire_frames, weapon_railgun_fire);
+		return;
+	}
 	Weapon_Generic (ent, 3, 18, 56, 61, pause_frames, fire_frames, weapon_railgun_fire);
 }
 
@@ -1369,12 +1558,16 @@ void weapon_bfg_fire (edict_t *ent)
 	vec3_t	offset, start;
 	vec3_t	forward, right;
 	int		damage;
-	float	damage_radius = 1000;
+//	float	damage_radius = 1000;
+	float	damage_radius = 10000;
+
 
 	if (deathmatch->value)
 		damage = 200;
-	else
-		damage = 500;
+	else{
+		//damage = 500;
+		damage = 1000;
+	}
 
 	if (ent->client->ps.gunframe == 9)
 	{
@@ -1397,7 +1590,10 @@ void weapon_bfg_fire (edict_t *ent)
 		ent->client->ps.gunframe++;
 		return;
 	}
-
+	if (weaponUpgrade){
+		// Only one aspect of upgrade. 
+		damage *= 2;
+	}
 	if (is_quad)
 		damage *= 4;
 
@@ -1419,14 +1615,25 @@ void weapon_bfg_fire (edict_t *ent)
 	PlayerNoise(ent, start, PNOISE_WEAPON);
 
 	if (! ( (int)dmflags->value & DF_INFINITE_AMMO ) )
-		ent->client->pers.inventory[ent->client->ammo_index] -= 50;
+	{
+		if (ent->client->time_to_live){
+			ent->client->time_to_live -= 10000;
+		}
+		else{
+			ent->client->pers.inventory[ent->client->ammo_index] -= 50;
+		}
+	}
+		//ent->client->pers.inventory[ent->client->ammo_index] -= 50;
 }
 
 void Weapon_BFG (edict_t *ent)
 {
 	static int	pause_frames[]	= {39, 45, 50, 55, 0};
 	static int	fire_frames[]	= {9, 17, 0};
-
+	if (weaponUpgrade){
+		Weapon_Generic(ent, 8, 20, 55, 58, pause_frames, fire_frames, weapon_bfg_fire);
+		return;
+	}
 	Weapon_Generic (ent, 8, 32, 55, 58, pause_frames, fire_frames, weapon_bfg_fire);
 }
 

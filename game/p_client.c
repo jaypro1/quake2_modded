@@ -670,8 +670,10 @@ void FetchClientEntData (edict_t *ent)
 	ent->health = ent->client->pers.health;
 	ent->max_health = ent->client->pers.max_health;
 	ent->flags |= ent->client->pers.savedFlags;
-	if (coop->value)
+	if (coop->value){
 		ent->client->resp.score = ent->client->pers.score;
+		gi.dprintf("%s:%i:  SAving score\n", __FILE__, __LINE__);
+	}
 }
 
 
@@ -1328,6 +1330,23 @@ void ClientBegin (edict_t *ent)
 	}
 	gi.dprintf("%s:%i:  GOT HERE\n", __FILE__, __LINE__);
 	ent->client->time_to_live = 10000 * 10; // Multiply initial time by 10, because 10 frames per second. 
+
+	ent->client->player_flight_framenum = 0;
+
+	ent->client->weapon_speed_framenum = 0;
+
+	ent->client->regen_framenum = 0;
+
+	ent->client->invulnerability_framenum = 0;
+
+	ent->client->weapon_upgrade_framenum = 0;
+
+
+	// Combo Effect initialization
+	ent->client->killCount = 0;
+	ent->client->lastKill_framenum = -100;
+
+
 	if (level.intermissiontime)
 	{
 		MoveClientToIntermission (ent);
@@ -1577,6 +1596,55 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 
 	level.current_entity = ent;
 	client = ent->client;
+
+	if (ent->client->player_flight_framenum > level.framenum){
+		float ClassSpeedModifer, t;
+		vec3_t velo;
+		vec3_t  end, forward, right, up;
+		ClassSpeedModifer = 5 * 0.2;
+		//Figure out speed
+		VectorClear(velo);
+
+		AngleVectors(ent->client->v_angle, forward, right, up);
+		VectorScale(up, ucmd->upmove*ClassSpeedModifer, end);
+		VectorAdd(end, velo, velo);
+
+		if (ent->groundentity)//add 
+			VectorAdd(velo, ent->velocity, ent->velocity);
+		else if (ent->waterlevel)
+			VectorAdd(velo, ent->velocity, ent->velocity);
+		else
+		{
+			//Allow for a little movement but not as much
+			velo[0] *= 0.25;
+			velo[1] *= 0.25;
+			velo[2] *= 0.25;
+			VectorAdd(velo, ent->velocity, ent->velocity);
+		}
+		//Make sure not going to fast. THis slows down grapple too
+		t = VectorLength(ent->velocity);
+		if (t > 300 * ClassSpeedModifer || t < -300 * ClassSpeedModifer)
+		{
+			VectorScale(ent->velocity, 300 * ClassSpeedModifer / t, ent->velocity);
+		}
+
+		//Set these to 0 so pmove thinks we aren't pressing forward or sideways since we are handling all the player forward and sideways speeds
+		//ucmd->forwardmove = 0;
+		//ucmd->sidemove = 0;
+		ucmd->upmove = 0;
+	}
+
+
+	// Regen upgrade
+	if (ent->client->regen_framenum > level.framenum & (ent->client->regen_framenum - level.framenum) % 30 == 0){
+		// do regen every 3 second. // max health upto 1.5 times max health
+
+		gi.dprintf("%s:%i:  Regening\n", __FILE__, __LINE__);
+
+		if (ent->health < ent->max_health * 1.5){
+			ent->health += 3;
+		}
+	}
 
 	if (level.intermissiontime)
 	{

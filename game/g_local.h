@@ -963,6 +963,19 @@ struct gclient_s
 
 	// New Variables:
 	float		time_to_live;
+
+	int			player_flight_framenum;
+
+	int			weapon_speed_framenum;
+
+	int			regen_framenum;
+	
+	int			invulnerability_framenum;
+
+	int			weapon_upgrade_framenum;
+	
+	int			killCount;
+	float		lastKill_framenum;
 };
 
 

@@ -108,7 +108,12 @@ gitem_t	*FindItem (char *pickup_name)
 		if (!it->pickup_name)
 			continue;
 		if (!Q_stricmp(it->pickup_name, pickup_name))
+		{
+			gi.dprintf("%s:%i: Got Item:  %s, at int: %d\n", __FILE__, __LINE__,pickup_name, i);
+
 			return it;
+		}
+			
 	}
 
 	return NULL;
@@ -236,6 +241,8 @@ qboolean Pickup_Bandolier (edict_t *ent, edict_t *other)
 	if (item)
 	{
 		index = ITEM_INDEX(item);
+		other->client->time_to_live += item->quantity * 10;
+
 		other->client->pers.inventory[index] += item->quantity;
 		if (other->client->pers.inventory[index] > other->client->pers.max_bullets)
 			other->client->pers.inventory[index] = other->client->pers.max_bullets;
@@ -245,6 +252,8 @@ qboolean Pickup_Bandolier (edict_t *ent, edict_t *other)
 	if (item)
 	{
 		index = ITEM_INDEX(item);
+		other->client->time_to_live += item->quantity * 10;
+
 		other->client->pers.inventory[index] += item->quantity;
 		if (other->client->pers.inventory[index] > other->client->pers.max_shells)
 			other->client->pers.inventory[index] = other->client->pers.max_shells;
@@ -278,6 +287,8 @@ qboolean Pickup_Pack (edict_t *ent, edict_t *other)
 	if (item)
 	{
 		index = ITEM_INDEX(item);
+		other->client->time_to_live += item->quantity * 10;
+
 		other->client->pers.inventory[index] += item->quantity;
 		if (other->client->pers.inventory[index] > other->client->pers.max_bullets)
 			other->client->pers.inventory[index] = other->client->pers.max_bullets;
@@ -287,6 +298,8 @@ qboolean Pickup_Pack (edict_t *ent, edict_t *other)
 	if (item)
 	{
 		index = ITEM_INDEX(item);
+		other->client->time_to_live += item->quantity * 10;
+
 		other->client->pers.inventory[index] += item->quantity;
 		if (other->client->pers.inventory[index] > other->client->pers.max_shells)
 			other->client->pers.inventory[index] = other->client->pers.max_shells;
@@ -296,6 +309,8 @@ qboolean Pickup_Pack (edict_t *ent, edict_t *other)
 	if (item)
 	{
 		index = ITEM_INDEX(item);
+		other->client->time_to_live += item->quantity * 10;
+
 		other->client->pers.inventory[index] += item->quantity;
 		if (other->client->pers.inventory[index] > other->client->pers.max_cells)
 			other->client->pers.inventory[index] = other->client->pers.max_cells;
@@ -305,6 +320,8 @@ qboolean Pickup_Pack (edict_t *ent, edict_t *other)
 	if (item)
 	{
 		index = ITEM_INDEX(item);
+		other->client->time_to_live += item->quantity * 10;
+
 		other->client->pers.inventory[index] += item->quantity;
 		if (other->client->pers.inventory[index] > other->client->pers.max_grenades)
 			other->client->pers.inventory[index] = other->client->pers.max_grenades;
@@ -314,6 +331,8 @@ qboolean Pickup_Pack (edict_t *ent, edict_t *other)
 	if (item)
 	{
 		index = ITEM_INDEX(item);
+		other->client->time_to_live += item->quantity * 10;
+
 		other->client->pers.inventory[index] += item->quantity;
 		if (other->client->pers.inventory[index] > other->client->pers.max_rockets)
 			other->client->pers.inventory[index] = other->client->pers.max_rockets;
@@ -323,6 +342,8 @@ qboolean Pickup_Pack (edict_t *ent, edict_t *other)
 	if (item)
 	{
 		index = ITEM_INDEX(item);
+		other->client->time_to_live += item->quantity * 10;
+
 		other->client->pers.inventory[index] += item->quantity;
 		if (other->client->pers.inventory[index] > other->client->pers.max_slugs)
 			other->client->pers.inventory[index] = other->client->pers.max_slugs;
@@ -473,6 +494,7 @@ qboolean Add_Ammo (edict_t *ent, gitem_t *item, int count)
 		return false;
 
 	ent->client->pers.inventory[index] += count;
+	ent->client->time_to_live += max * 10;
 
 	if (ent->client->pers.inventory[index] > max)
 		ent->client->pers.inventory[index] = max;
@@ -751,6 +773,91 @@ void Drop_PowerArmor (edict_t *ent, gitem_t *item)
 	Drop_General (ent, item);
 }
 
+//======================================================================
+	// Player Flight. 
+qboolean Pickup_Player_Flight(edict_t *ent, edict_t *other)
+{
+	other->client->pers.inventory[ITEM_INDEX(ent->item)]++;
+	// Instantly use item. 
+	ent->item->use(other, ent->item);
+	return true;
+}
+void Use_Player_Flight(edict_t *ent, gitem_t *item)
+{
+	gi.dprintf("%s:%i:  Using Player Flight\n", __FILE__, __LINE__);
+
+	ent->client->pers.inventory[ITEM_INDEX(item)]--;
+	ValidateSelectedItem(ent);
+	if (ent->client->player_flight_framenum > level.framenum)
+		ent->client->player_flight_framenum += 300;
+	else
+		ent->client->player_flight_framenum = level.framenum + 300;
+
+}
+
+//======================================================================
+	// invulnerability
+qboolean Pickup_Invulnerability(edict_t *ent, edict_t *other)
+{
+	other->client->pers.inventory[ITEM_INDEX(ent->item)]++;
+	// Instantly use item. 
+	ent->item->use(other, ent->item);
+	return true;
+}
+void Use_Invulnerability_Upgrade(edict_t *ent, gitem_t *item)
+{
+	gi.dprintf("%s:%i:  Using invulnerability upgrade\n", __FILE__, __LINE__);
+
+	ent->client->pers.inventory[ITEM_INDEX(item)]--;
+	ValidateSelectedItem(ent);
+	if (ent->client->invulnerability_framenum > level.framenum)
+		ent->client->invulnerability_framenum += 300;
+	else
+		ent->client->invulnerability_framenum = level.framenum + 300;
+
+}
+//======================================================================
+	// Player Regen
+qboolean Pickup_Regen(edict_t *ent, edict_t *other)
+{
+	other->client->pers.inventory[ITEM_INDEX(ent->item)]++;
+	// Instantly use item. 
+	ent->item->use(other, ent->item);
+	return true;
+}
+void Use_Regen(edict_t *ent, gitem_t *item)
+{
+	gi.dprintf("%s:%i:  Using regen upgrade\n", __FILE__, __LINE__);
+
+	ent->client->pers.inventory[ITEM_INDEX(item)]--;
+	ValidateSelectedItem(ent);
+	if (ent->client->regen_framenum > level.framenum)
+		ent->client->regen_framenum += 300;
+	else
+		ent->client->regen_framenum = level.framenum + 300;
+
+}
+//======================================================================
+	// Player Weapon Upgrade. 
+qboolean Pickup_Weapon_Upgrade(edict_t *ent, edict_t *other)
+{
+	other->client->pers.inventory[ITEM_INDEX(ent->item)]++;
+	// Instantly use item. 
+	ent->item->use(other, ent->item);
+	return true;
+}
+void Use_Weapon_Upgrade(edict_t *ent, gitem_t *item)
+{
+	gi.dprintf("%s:%i:  Using weapon speed and damage upgrade\n", __FILE__, __LINE__);
+
+	ent->client->pers.inventory[ITEM_INDEX(item)]--;
+	ValidateSelectedItem(ent);
+	if (ent->client->weapon_upgrade_framenum > level.framenum)
+		ent->client->weapon_upgrade_framenum += 300;
+	else
+		ent->client->weapon_upgrade_framenum = level.framenum + 300;
+
+}
 //======================================================================
 
 /*
@@ -2110,6 +2217,91 @@ tank commander's head
 		0,
 /* precache */ "items/s_health.wav items/n_health.wav items/l_health.wav items/m_health.wav"
 	},
+
+	{
+		"item_player_flight",
+		Pickup_Player_Flight,
+		Use_Player_Flight,
+		Drop_General,
+		NULL,
+		"items/pkup.wav",
+		"models/power_up/tris.md2", EF_ROTATE,
+		NULL,
+		/* icon */ "tech1",
+		/* pickup */ "Player Flight upgrade",
+		/* width */ 2,
+		0,
+		NULL,
+		IT_STAY_COOP | IT_POWERUP,
+		0,
+		NULL,
+		0,
+		/* precache */ ""
+	}
+	,
+
+	{
+		"item_invulnerability",
+		Pickup_Invulnerability,
+		Use_Invulnerability_Upgrade,
+		Drop_General,
+		NULL,
+		"items/pkup.wav",
+		"models/power_up/tris.md2", EF_ROTATE,
+		NULL,
+		/* icon */ "tech2",
+		/* pickup */ "Player Invulnerability upgrade",
+		/* width */ 2,
+		0,
+		NULL,
+		IT_STAY_COOP | IT_POWERUP,
+		0,
+		NULL,
+		0,
+		/* precache */ ""
+	}, 
+
+	{
+		"item_regen",
+		Pickup_Regen,
+		Use_Regen,
+		Drop_General,
+		NULL,
+		"items/pkup.wav",
+		"models/power_up/tris.md2", EF_ROTATE,
+		NULL,
+		/* icon */ "tech3",
+		/* pickup */ "Player Regen upgrade",
+		/* width */ 2,
+		0,
+		NULL,
+		IT_STAY_COOP | IT_POWERUP,
+		0,
+		NULL,
+		0,
+		/* precache */ ""
+	}, 
+
+	{
+		"item_damage_amp",
+		Pickup_Weapon_Upgrade,
+		Use_Weapon_Upgrade,
+		Drop_General,
+		NULL,
+		"items/pkup.wav",
+		"models/power_up/tris.md2", EF_ROTATE,
+		NULL,
+		/* icon */ "tech4",
+		/* pickup */ "Player Damage/Speed upgrade",
+		/* width */ 2,
+		0,
+		NULL,
+		IT_STAY_COOP | IT_POWERUP,
+		0,
+		NULL,
+		0,
+		/* precache */ ""
+	}, 
 
 	// end of list marker
 	{NULL}

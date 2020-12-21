@@ -77,6 +77,7 @@ void BeginIntermission (edict_t *targ)
 
 	if (level.intermissiontime)
 		return;		// already activated
+	gi.dprintf("%s:%i:  Beginning Intermission\n", __FILE__, __LINE__);
 
 	game.autosaved = false;
 
@@ -485,11 +486,96 @@ void G_SetStats (edict_t *ent)
 		ent->client->ps.stats[STAT_TIME_HOURS] = 0;
 		ent->client->ps.stats[STAT_TIME_MINUTES] = 0;
 		ent->client->ps.stats[STAT_TIME_SECONDS] = 0;
+		gi.dprintf("%s:%i:  Killing player. \n", __FILE__, __LINE__);
 
 		player_die(ent, ent, ent, 100000, vec3_origin);
+	}
 
-	}							
+	if ((level.framenum - ent->client->lastKill_framenum) < 100){
+		// Within last 10 seconds
+		ent->client->ps.stats[COMBO_TIME] = (ent->client->lastKill_framenum + 100 - level.framenum) / 10;
 
+		if (ent->client->killCount == 0){
+			ent->client->ps.stats[COMBO_TEXT] = 0;
+			//ent->client->ps.stats[COMBO_TEXT] = "";
+
+		}
+		else if (ent->client->killCount % 5 == 1){
+			// Has 1 kill or 6 kills -> reset to 1
+			ent->client->ps.stats[COMBO_TEXT] = 1;
+//			ent->client->ps.stats[COMBO_TEXT] = "Single Kill";
+
+			ent->client->killCount = 1;
+
+		}
+		else if (ent->client->killCount == 2){
+			ent->client->ps.stats[COMBO_TEXT] = 2;
+//			ent->client->ps.stats[COMBO_TEXT] = "Double Kill";
+
+
+		}
+		else if (ent->client->killCount == 3){
+			ent->client->ps.stats[COMBO_TEXT] = 3;
+			//ent->client->ps.stats[COMBO_TEXT] = "Triple Kill";
+
+		}
+		else if (ent->client->killCount == 4){
+			ent->client->ps.stats[COMBO_TEXT] = 4;
+//			ent->client->ps.stats[COMBO_TEXT] = "Quadruple Kill";
+
+
+		}
+		else if (ent->client->killCount == 5){
+			ent->client->ps.stats[COMBO_TEXT] = 5;
+//			ent->client->ps.stats[COMBO_TEXT] = "Pentuple Kill";
+
+		}
+		else {
+			ent->client->ps.stats[COMBO_TEXT] = -1;
+//			ent->client->ps.stats[COMBO_TEXT] = "UNHANDLED";
+
+			ent->client->killCount = 0;
+			ent->client->lastKill_framenum = 0;
+
+			// reset after penta kill. 
+		}
+		
+	}
+	else{
+		ent->client->ps.stats[COMBO_TIME] = 0;
+		ent->client->ps.stats[COMBO_TEXT] = 0;
+//		ent->client->ps.stats[COMBO_TEXT] = "";
+
+	}
+	
+	// Flight Upgrade
+	if (ent->client->player_flight_framenum > level.framenum){
+		ent->client->ps.stats[FLIGHT] = (ent->client->player_flight_framenum - level.framenum) / 10;
+	}
+	else{
+		ent->client->ps.stats[FLIGHT] = 0;
+	}
+	// Regen
+	if (ent->client->regen_framenum > level.framenum){
+		ent->client->ps.stats[REGEN] = (ent->client->regen_framenum - level.framenum) / 10;
+	}
+	else{
+		ent->client->ps.stats[REGEN] = 0;
+	}
+	// Weapon Upgrade
+	if (ent->client->weapon_upgrade_framenum > level.framenum){
+		ent->client->ps.stats[WPUPGRADE] = (ent->client->weapon_upgrade_framenum - level.framenum) / 10;
+	}
+	else{
+		ent->client->ps.stats[WPUPGRADE] = 0;
+	}
+	//INVULNERABILITY            
+	if (ent->client->invulnerability_framenum > level.framenum){
+		ent->client->ps.stats[INVULNERABILITY] = (ent->client->invulnerability_framenum - level.framenum) / 10;
+	}
+	else{
+		ent->client->ps.stats[INVULNERABILITY] = 0;
+	}
 
 	//
 	// selected item
